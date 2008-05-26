@@ -26,6 +26,7 @@ import gdata.geo as Geo
 # XML namespaces which are often used in YouTube entities.
 YOUTUBE_NAMESPACE = 'http://gdata.youtube.com/schemas/2007'
 YOUTUBE_TEMPLATE = '{http://gdata.youtube.com/schemas/2007}%s'
+YOUTUBE_FORMAT = '{http://gdata.youtube.com/schemas/2007}format'
 
 class Username(atom.AtomBase):
   """The YouTube Username element"""
@@ -228,26 +229,26 @@ class YouTubePlaylistVideoEntry(gdata.GDataEntry):
   _namespace = gdata.GDataEntry._namespace
   _children = gdata.GDataEntry._children.copy()
   _attributes = gdata.GDataEntry._attributes.copy()
+  _children['{%s}feedLink' % gdata.GDATA_NAMESPACE] = ('feed_link',
+                                                        [gdata.FeedLink])
   _children['{%s}description' % YOUTUBE_NAMESPACE] = ('description',
                                                        Description)
-  _children['{%s}position' % YOUTUBE_NAMESPACE] = ('position', Position)
   _children['{%s}rating' % gdata.GDATA_NAMESPACE] = ('rating', Rating)
   _children['{%s}comments' % gdata.GDATA_NAMESPACE] = ('comments', Comments)
   _children['{%s}statistics' % YOUTUBE_NAMESPACE] = ('statistics', Statistics)
+  _children['{%s}location' % YOUTUBE_NAMESPACE] = ('location', Location)
+  _children['{%s}position' % YOUTUBE_NAMESPACE] = ('position', Position)
   _children['{%s}group' % gdata.media.MEDIA_NAMESPACE] = ('media', Media.Group)
 
   def __init__(self, author=None, category=None, content=None,
                atom_id=None, link=None, published=None, title=None,
-               updated=None, feed_link=None, description=None, media=None,
-               position=None, rating=None, comments=None, statistics=None,
+               updated=None, feed_link=None, description=None,
+               position=None,
                extension_elements=None, extension_attributes=None):
 
+    self.feed_link = feed_link
     self.description = description
     self.position = position
-    self.rating = rating
-    self.statistics = statistics
-    self.comments = comments
-    self.media = media or Media.Group()
 
     gdata.GDataEntry.__init__(self, author=author, category=category,
                               content=content, atom_id=atom_id,
@@ -376,11 +377,12 @@ class YouTubeVideoEntry(gdata.GDataEntry):
       Returns:
           URL of the embeddable video
     """
-    for content in self.media.content:
-      if content.format == '5':
-        return content.url
-      else:
-        return None
+    if self.media.content:
+      for content in self.media.content:
+        if content.extension_attributes[YOUTUBE_FORMAT] == '5':
+          return content.url
+    else:
+      return None
 
 
 class YouTubeUserEntry(gdata.GDataEntry):
@@ -464,7 +466,7 @@ class YouTubePlaylistEntry(gdata.GDataEntry):
   _children['{%s}description' % YOUTUBE_NAMESPACE] = ('description',
                                                        Description)
   _children['{%s}private' % YOUTUBE_NAMESPACE] = ('private',
-                                                       Private)
+                                                  Private)
   _children['{%s}feedLink' % gdata.GDATA_NAMESPACE] = ('feed_link',
                                                         [gdata.FeedLink])
 
@@ -542,13 +544,6 @@ class YouTubeVideoResponseFeed(gdata.GDataFeed, gdata.LinkFinder):
   _children['{%s}entry' % atom.ATOM_NAMESPACE] = ('entry',
                                                   [YouTubeVideoResponseEntry])
 
-class YouTubeMessageFeed(gdata.GDataFeed, gdata.LinkFinder):
-  # TODO (jhartmann) - to be implemented
-  pass
-
-class YouTubeMessageEntry(gdata.GDataEntry):
-  # TODO (jhartmann) - to be implemented
-  pass
 
 def YouTubeVideoFeedFromString(xml_string):
   return atom.CreateClassFromXMLString(YouTubeVideoFeed, xml_string)
@@ -612,9 +607,3 @@ def YouTubeVideoResponseFeedFromString(xml_string):
 
 def YouTubeVideoResponseEntryFromString(xml_string):
   return atom.CreateClassFromXMLString(YouTubeVideoResponseEntry, xml_string)
-
-def YouTubeMessageFeedFromString(xml_string):
-  return atom.CreateClassFromXMLString(YouTubeMessageFeed, xml_string)
-
-def YouTubeMessageEntryFromString(xml_string):
-  return atom.CreateClassFromXMLString(YouTubeMessageEntry, xml_string)
