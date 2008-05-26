@@ -22,5 +22,123 @@ Please also hop into our IRC channel if you feel so inclined:
 
 Here's a crash course in App Engine. For more detailed documentation, refer to the [http://code.google.com/appengine App Engine docs]. We're assuming all of your project files are in a folder named `Codelab`.
 
-  # Assuming you've downloaded and installed the SDK, start up your development webserver: `dev_appserver.py /path_to_project/Codelab/`
-  # Go to http://localhost:8080 to check it out.
+  * Create a file named `app.yaml`, your app's configuration file
+
+{{{
+application: codelab
+version: 1
+runtime: python
+api_version: 1
+
+handlers:
+- url: /.*
+  script: main.py
+}}}
+
+  * Now create `main.py` that you just referenced
+
+{{{
+import wsgiref.handlers
+
+from google.appengine.ext import webapp
+
+class MainPage(webapp.RequestHandler):
+  def get(self):
+    self.response.headers['Content-Type'] = 'text/plain'
+    self.response.out.write('Hello, App Engine!')
+
+def main():
+  application = webapp.WSGIApplication(
+                                       [('/', MainPage)],
+                                       debug=True)
+  wsgiref.handlers.CGIHandler().run(application)
+
+if __name__ == "__main__":
+  main()
+}}}
+
+  * Assuming you've downloaded and installed the SDK, start up your development webserver: `dev_appserver.py /path_to_project/Codelab/`
+  * Go to http://localhost:8080 to check it out.
+
+All the source files can be browsed [http://code.google.com/p/hello-youtube/source/browse here] under [http://code.google.com/p/hello-youtube/source/browse/trunk/01_hello_app_engine/ 01_hello_app_engine]. Or, download the zip files [http://hello-youtube.googlecode.com/files/01_hello_app_engine.zip here]. 
+
+= Hello YouTube =
+
+Let's fiddle around with fetching feeds on the command line. Download the client library modules [TODO here].
+
+Imports
+
+{{{
+>>> import gdata.service
+>>> import gdata.urlfetch
+>>> import gdata.youtube
+>>> import gdata.youtube.service
+}}}
+
+Creating a service object
+
+{{{
+>>> client = gdata.youtube.service.YouTubeService()
+}}}
+
+Getting a video feed with that service object
+
+{{{
+>>> feed = client.GetMostViewedVideoFeed()
+}}}
+
+Feed now contains a list of video entries - check it out
+
+{{{
+>>> feed.__dict__()
+}}}
+
+Accessing metadata
+
+{{{
+>>> print feed.entry[0].title.text
+}}}
+
+= YouTube + App Engine =
+
+To use the Google Data Python Client Library with your Google App Engine application, simply place the library source files in your application's directory. The `atom/` and `gdata/` source files are available [TODO here]. The only other step is to set the `gdata.service.http_request_handler` to use `gdata.urlfetch`. 
+
+{{{
+#!/usr/bin/env python
+
+import cgi
+import wsgiref.handlers
+import os
+import urllib
+
+import gdata.urlfetch
+import gdata.service
+import gdata.youtube
+import gdata.youtube.service
+
+from google.appengine.ext import webapp	
+
+class MainPage(webapp.RequestHandler):
+  def get(self):
+    client = gdata.youtube.service.YouTubeService()
+    feed = client.GetMostViewedVideoFeed()
+
+    self.response.out.write('<html><body>')
+
+    for entry in feed.entry:
+      self.response.out.write('<p>Title: %s </p>' % entry.title.text)
+      self.response.out.write('<p>Description: %s </p>' % entry.title.text)
+      self.response.out.write('<p><img src="%s"></p>' % entry.media.thumbnail[0].url)
+
+    self.response.out.write('</body></html>')
+
+def main():
+  application = webapp.WSGIApplication(
+                                       [('/', MainPage)],
+                                        debug=True)
+  wsgiref.handlers.CGIHandler().run(application)
+
+if __name__ == "__main__":
+  main()
+}}}
+
