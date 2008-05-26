@@ -36,6 +36,8 @@ import gdata
 import atom
 import gdata.service
 import gdata.youtube
+# TODO (jhartmann) - add subscription and message functions, query objects
+# TODO (jhartmann) - rewrite queries to allow passing in projections
 
 YOUTUBE_SERVER = 'gdata.youtube.com'
 YOUTUBE_SERVICE = 'youtube'
@@ -72,9 +74,6 @@ YOUTUBE_COMPLAINT_CATEGORY_TERMS = ('PORN', 'VIOLENCE', 'HATE', 'DANGEROUS',
                                    'RIGHTS', 'SPAM')
 YOUTUBE_CONTACT_STATUS = ('accepted', 'rejected')
 YOUTUBE_CONTACT_CATEGORY = ('Friends', 'Family')
-
-
-
 
 UNKOWN_ERROR=1000
 YOUTUBE_BAD_REQUEST=400
@@ -743,36 +742,13 @@ class YouTubeService(gdata.service.GDataService):
         term='favorites')
     subscription_username = gdata.youtube.Username(text=username)
 
-    subscription_entry = gdata.GDataEntry(category=subscription_category)
-    subscription_entry.extension_elements.append(subscription_username)
+    subscription_entry = gdata.youtube.YouTubeSubscriptionEntry(
+        category=subscription_category,
+        username=subscription_username)
 
     post_uri = YOUTUBE_USER_FEED_URI + 'default/subscriptions'
     return self.Post(subscription_entry, post_uri,
                      converter=gdata.youtube.YouTubeSubscriptionEntryFromString)
-
-  def AddSubscriptionToKeyword(self, keyword_string):
-    """Add a new subscription to a keyword to the currently authenticated 
-    user's account
-
-    Needs authentication
-
-    Arguments:
-        keyword_string: A keyword to subscripe to. Can contain white-space, such
-            as 'Dog Skateboarding'
-
-    Returns:
-        A new GDataEntry if successful
-    """
-    subscription_category = atom.Category(
-        scheme='http://gdata.youtube.com/schemas/2007/subscriptiontypes.cat',
-        term='favorites')
-    subscription_username = gdata.youtube.Username(text=username)
-
-    subscription_entry = gdata.GDataEntry(category=subscription_category)
-    subscription_entry.extension_elements.append(subscription_username)
-
-    post_uri = YOUTUBE_USER_FEED_URI + 'default/subscriptions'
-    return self.Post(subscription_entry, post_uri)
 
   def DeleteSubscription(self, subscription_uri):
     """Delete a subscription from the currently authenticated user's account
