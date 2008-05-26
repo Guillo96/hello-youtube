@@ -1,0 +1,26 @@
+#summary YouTube + App Engine Codelab
+
+= Introduction =
+
+This codelab will take you through the basics of using the Google Data Python Client Library with App Engine. It will go from fetching feeds, to authentication, to uploading a video to YouTube. All code samples in this codelab can be found [http://code.google.com/p/hello-youtube/source/browse here].
+
+= Before We Start =
+
+Here are the things you'll need:
+  * Knowledge of [http://python.org Python]
+  * [http://python.org/download/ Python 2.5] on your local machine
+  * [http://code.google.com/appengine/downloads.html App Engine SDK]
+  * App Engine Account - TODO: Add live link once it's open
+  * YouTube [http://code.google.com/apis/youtube/dashboard/ Developer Key]
+  * YouTube [http://youtube.com/signup Account] (preferably a test account with a private video uploaded to test authenticated feeds)
+
+Please also hop into our IRC channel if you feel so inclined:
+
+  * #youtubecodelab
+
+= Hello App Engine =
+
+Here's a crash course in App Engine. For more detailed documentation, refer to the [http://code.google.com/appengine App Engine docs]. We're assuming all of your project files are in a folder named `Codelab`.
+
+  # Assuming you've downloaded and installed the SDK, start up your development webserver: `dev_appserver.py /path_to_project/Codelab/`
+  # Go to http://localhost:8080 to check it out.
