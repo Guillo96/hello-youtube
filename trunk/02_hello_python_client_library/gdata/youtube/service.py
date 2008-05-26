@@ -37,6 +37,10 @@ import atom
 import gdata.service
 import gdata.youtube
 
+#TODO (jhartmann) - implement message functionality
+#TODO (jhartmann) - better object model for queries
+
+
 YOUTUBE_SERVER = 'gdata.youtube.com'
 YOUTUBE_SERVICE = 'youtube'
 YOUTUBE_SUPPORTED_UPLOAD_TYPES = ('mov', 'avi', 'wmv', 'mpg', 'quicktime')
