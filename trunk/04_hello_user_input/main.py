@@ -33,13 +33,17 @@ class SearchPage(webapp.RequestHandler):
   def post(self):
     search_term = cgi.escape(self.request.get('content'))
     
+    self.response.out.write("""<html><head><title>
+        hello_youtube_search_query: Searching YouTube</title>
+        <link type="text/css" rel="stylesheet" href="/stylesheets/main.css" />
+        </head><body><div id="video_listing">""")
+    
     self.response.out.write("""
-      <html>
-        <body>
-          <form action="/" method="post">
-            <div><input type="text" name="content" value=%s /></div>
-            <div><input type="submit" value="Search YouTube"></div>
-          </form>""" % search_term)
+        <span class="listing_title">
+        Searching for '%s'</span><br /><br />""" % search_term)
+
+    self.response.out.write('<table border="0" cellpadding="2" '
+        'cellspacing="0">')
 
     client = gdata.youtube.service.YouTubeService()
     query = gdata.youtube.service.YouTubeVideoQuery()
@@ -49,15 +53,27 @@ class SearchPage(webapp.RequestHandler):
     feed = client.YouTubeQuery(query)
     
     for entry in feed.entry:
-      swf_url = entry.GetSwfUrl()
-      self.response.out.write('<p>Title: %s </p>' % entry.title.text)
-      self.response.out.write("""<p><object width="425" height="355"><param name="movie" value="%s">
-           </param><param name="wmode" value="transparent"></param>
-           <embed src="%s" 
-           type="application/x-shockwave-flash" wmode="transparent" 
-           width="425" height="355"></embed></object></p>""" % (swf_url, swf_url))
-      self.response.out.write('<p>Description: %s </p>' % entry.title.text)
-
+      if entry.GetSwfUrl():
+        swf_url = entry.GetSwfUrl()
+        self.response.out.write(
+            '<tr><td><span class="video_title">%s</span><br /><br />' % 
+            entry.title.text)
+        self.response.out.write("""<object width="425" height="355">
+            <param name="movie" value="%s"></param>
+            <param name="wmode" value="transparent"></param>
+            <embed src="%s" type="application/x-shockwave-flash" 
+            wmode="transparent" width="425" height="355"></embed></object>
+            <br />""" % (swf_url, swf_url))
+        self.response.out.write(
+            '<span class="video_description">%s</span>'
+            '<br />' % entry.media.description)
+        self.response.out.write(
+            '<span class="video_rating">Rating: %s of 5 stars<br/>%s Votes '
+            '</span></td></tr>' % 
+            (entry.rating.average, entry.rating.num_raters))
+        self.response.out.write(
+            '<tr><td height="20"><hr class="slight"/></tr>')
+    self.response.out.write('</table></div>')
     self.response.out.write('</body></html>')
 
     
