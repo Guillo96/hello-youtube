@@ -72,7 +72,7 @@ You can use the App Engine Launcher instead of the command line
 
 = Hello YouTube =
 
-Let's fiddle around with fetching feeds on the command line. Download the client library modules [TODO here].
+Let's fiddle around with fetching feeds on the command line. Download the client library source files [TODO here]. Place the `atom` and `gdata` folders into your `Codelab` folder. Navigate to `Codelab` and start up your Python interpreter. 
 
 Imports
 
@@ -93,10 +93,10 @@ Getting a video feed with that service object
 >>> feed = client.GetMostViewedVideoFeed()
 }}}
 
-Feed now contains a list of video entries - check it out
+Feed now contains a list of video entries.
 
 {{{
->>> feed.__dict__()
+>>> feed.__dict__
 }}}
 
 Accessing metadata
