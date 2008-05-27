@@ -7,7 +7,6 @@ import gdata.youtube.service
 from google.appengine.api import users
 from google.appengine.ext import webapp
 from google.appengine.ext import db
-from google.appengine.ext.webapp import template
 
 # set request handling to gdata.urlfetch
 gdata.service.http_request_handler = gdata.urlfetch
@@ -17,6 +16,7 @@ class MainPage(webapp.RequestHandler):
   def get(self):
     client = gdata.youtube.service.YouTubeService()
     feed = client.GetRecentlyFeaturedVideoFeed()
+
     self.response.out.write("""<html><head><title>
         hello_python_client_library: Retrieving a YouTube feed</title>
         <link type="text/css" rel="stylesheet" href="/stylesheets/main.css" />
@@ -44,7 +44,7 @@ class MainPage(webapp.RequestHandler):
           '<span class="video_description">%s</span>'
           '<br /><br />' % entry.media.description)
 
-    # uncomment this sectino to show the embeddable player
+    # uncomment this section to show the embeddable player
     # if entry.GetSwfUrl():
     #   self.response.out.write('<object width="425" height="350">'
     #      '<param name="movie" value="' + entry.GetSwfUrl() + '"></param>'
