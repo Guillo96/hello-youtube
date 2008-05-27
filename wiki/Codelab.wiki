@@ -77,8 +77,6 @@ Let's fiddle around with fetching feeds on the command line. Download the client
 Imports
 
 {{{
->>> import gdata.service
->>> import gdata.urlfetch
 >>> import gdata.youtube
 >>> import gdata.youtube.service
 }}}
