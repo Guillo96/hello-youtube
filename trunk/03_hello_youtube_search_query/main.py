@@ -22,7 +22,7 @@ class MainPage(webapp.RequestHandler):
     client = gdata.youtube.service.YouTubeService()
     query = gdata.youtube.service.YouTubeVideoQuery()
     
-    query.vq = 'bicycle'
+    query.vq = 'bicycle dalmation'
     query.orderby = 'viewCount'
     query.max_results = '5'
 
