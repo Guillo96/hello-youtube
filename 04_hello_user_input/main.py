@@ -1,20 +1,12 @@
-#!/usr/bin/env python
-
 import cgi
 import wsgiref.handlers
-import os
-import urllib
 
 import gdata.urlfetch
 import gdata.service
 import gdata.youtube
 import gdata.youtube.service
 
-from google.appengine.api import users
 from google.appengine.ext import webapp
-from google.appengine.ext import db
-from google.appengine.ext.webapp import template
-
 
 gdata.service.http_request_handler = gdata.urlfetch
       
@@ -31,8 +23,7 @@ class SearchPage(webapp.RequestHandler):
       </html>""")
       
   def post(self):
-    search_term = cgi.escape(self.request.get('content'))
-    
+    search_term = cgi.escape(self.request.get('content')).encode('UTF-8')
     self.response.out.write("""<html><head><title>
         hello_youtube_search_query: Searching YouTube</title>
         <link type="text/css" rel="stylesheet" href="/stylesheets/main.css" />
@@ -67,13 +58,21 @@ class SearchPage(webapp.RequestHandler):
         self.response.out.write(
             '<span class="video_description">%s</span>'
             '<br />' % entry.media.description)
-        self.response.out.write(
-            '<span class="video_rating">Rating: %s of 5 stars<br/>%s Votes '
-            '</span></td></tr>' % 
-            (entry.rating.average, entry.rating.num_raters))
+        if entry.rating:
+          self.response.out.write(
+              '<span class="video_rating">Rating: %s of 5 stars<br/>%s Votes '
+              '</span></td></tr>' % 
+              (entry.rating.average, entry.rating.num_raters))
         self.response.out.write(
             '<tr><td height="20"><hr class="slight"/></tr>')
-    self.response.out.write('</table></div>')
+    self.response.out.write('</table><br />')
+    self.response.out.write("""Search:<br />
+        <form action="/" method="post">
+        <div><input type="text" name="content" /></div>
+        <div><input type="submit" value="Search YouTube"></div>
+        </form>
+        """)
+
     self.response.out.write('</body></html>')
 
     
