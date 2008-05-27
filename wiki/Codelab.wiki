@@ -158,7 +158,7 @@ Solution can be found [http://code.google.com/p/hello-youtube/source/browse/trun
 
 == Assignment #2 ==
 
-Do a parameterized query to the search feed. Restrict the results to 5 videos with the term 'bicycle' in the metadata. Order the results by view count.
+Do a parameterized query to the search feed. Restrict the results to 5 videos with the term 'bicycle dalmation' in the metadata. Order the results by view count.
 
 Solution can be found [http://code.google.com/p/hello-youtube/source/browse/trunk/03_hello_youtube_search_query/main.py here].
 
@@ -167,3 +167,10 @@ Solution can be found [http://code.google.com/p/hello-youtube/source/browse/trun
 Take text input from the user and do a search query. Print out the results and embed the video.
 
 Solution can be found [http://code.google.com/p/hello-youtube/source/browse/trunk/04_hello_user_input/main.py here].
+
+= AuthSub =
+
+Now we'll walk through an example implementation using [http://code.google.com/apis/accounts/docs/AuthForWebApps.html AuthSub] authentication.
+
+Working source can be browsed [http://code.google.com/p/hello-youtube/source/browse/trunk/05_hello_authsub/ here]. Or downloaded [http://hello-youtube.googlecode.com/files/05_hello_authsub.zip here].
+
