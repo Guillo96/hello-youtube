@@ -20,6 +20,9 @@ Please also hop into our IRC channel if you feel so inclined:
   * irc.freenode.net port 6667
   * #youtubecodelab
 
+If you don't have a IRC client installed, there are web-based clients:
+  * www.mibbit.com
+
 = Hello App Engine =
 
 Here's a crash course in App Engine. For more detailed documentation, refer to the [http://code.google.com/appengine App Engine docs]. We're assuming all of your project files are in a folder named `Codelab`.
@@ -331,14 +334,14 @@ Create a new variable to store the developer key.
     self.developer_key = None
 }}}
 
-In post
+In the`post()` method, we can store it.
 
 {{{
 
     developer_key = cgi.escape(self.request.get('developer_key'))
 }}}
 
-Displaying upload form - the form action will post to `/upload`. - TODO: categories.cat?
+Now display a video metadata form - the form action will post to `/upload`.
 
 {{{
   def DisplayUploadForm(self):
