@@ -72,7 +72,7 @@ You can use the App Engine Launcher instead of the command line
 
 = Hello YouTube =
 
-Let's fiddle around with fetching feeds on the command line. Download the client library source files [TODO here]. Place the `atom` and `gdata` folders into your `Codelab` folder. Navigate to `Codelab` and start up your Python interpreter. 
+Let's fiddle around with fetching feeds on the command line. Download the client library source files [http://hello-youtube.googlecode.com/files/youtube_extensions_source.zip here]. Place the `atom` and `gdata` folders into your `Codelab` folder. Navigate to `Codelab` and start up your Python interpreter. 
 
 Imports
 
@@ -93,16 +93,19 @@ Getting a video feed with that service object
 >>> feed = client.GetMostViewedVideoFeed()
 }}}
 
-Feed now contains a list of video entries.
+Feed now contains a list of video entries. Let's look at the structure.
 
 {{{
->>> feed.__dict__
+>>> from pprint import pprint as px
+>>> px(feed.__dict__)
+>>> px(feed.entry[0].__dict__)
 }}}
 
-Accessing metadata
+Accessing metadata. Most of the metadata can be found in the media group element. (When in doubt, use __dict__ to look at the objects.)
 
 {{{
->>> print feed.entry[0].title.text
+>>> px(feed.entry[0].media.__dict__)
+>>> px(feed.entry[0].media.category.__dict__)
 }}}
 
 = YouTube + App Engine =
@@ -112,12 +115,7 @@ To use the Google Data Python Client Library with your Google App Engine applica
 Let's take what we just learned about using the client library with the API, and put it into a running App Engine app. Add these calls into the `get` method. 
 
 {{{
-#!/usr/bin/env python
-
-import cgi
 import wsgiref.handlers
-import os
-import urllib
 
 import gdata.urlfetch
 import gdata.service
@@ -135,7 +133,7 @@ class MainPage(webapp.RequestHandler):
 
     for entry in feed.entry:
       self.response.out.write('<p>Title: %s </p>' % entry.title.text)
-      self.response.out.write('<p>Description: %s </p>' % entry.title.text)
+      self.response.out.write('<p>Description: %s </p>' % entry.media.description.text)
       self.response.out.write('<p><img src="%s"></p>' % entry.media.thumbnail[0].url)
 
     self.response.out.write('</body></html>')
@@ -150,7 +148,7 @@ if __name__ == "__main__":
   main()
 }}}
 
-== Assignment #1 (5 min) ==
+== Assignment #1 ==
 
 Make a page that retrieves and prints out the title, description, and first thumbnail from the [http://code.google.com/apis/youtube/reference.html#Standard_feeds Recently Featured] standard feed.
 
@@ -174,22 +172,56 @@ Now we'll walk through an example implementation using [http://code.google.com/a
 
 Working source can be browsed [http://code.google.com/p/hello-youtube/source/browse/trunk/05_hello_authsub/ here]. Or downloaded [http://hello-youtube.googlecode.com/files/05_hello_authsub.zip here].
 
-=== Generating the AuthSub Link ==
+=== Note about App Engine Admin Console ===
 
-To generate the link, let's create some variables and add an __init__() file:
+We'll be storing the session token using the App Engine Datastore, so now's a good time to bring up the admin console.
+  * http://localhost:8080/_ah/admin/
+
+Here you can view the content of the Datastore. 
+  * http://localhost:8080/_ah/admin/datastore
+  * Enter the name of the data structure that you created in the app to view contents
+    * In the case of our example, "StoredToken"
+
+
+=== Using the App Engine Users API ===
+
+We want to authenticate our current App Engine user to YouTube, so we have to store their user name and then associate it with a YouTube token. 
+
+Import the users module:
 
 {{{
-  def __init__(self):
-    self.youtube_scope = 'http://gdata.youtube.com'
-    self.my_app_domain = None
+from google.appengine.ext import users
+}}}
 
+Get the current user if they're logged into Google Accounts, otherwise, direct them to log in. Make the "Sign In" and "Sign Out" links.
+
+{{{
+    self.current_user = users.GetCurrentUser()
+
+    self.response.out.write('<body>')
+    if self.current_user:
+      self.response.out.write('<a href="%s">Sign Out</a><br>' % (
+          users.CreateLogoutURL(self.request.uri)))
+    else:
+      self.response.out.write('<a href="%s">Sign In</a><br>' % (
+          users.CreateLoginURL(self.request.uri)))
+
+}}}
+
+=== Generating the AuthSub Link ==
+
+These variables are added in the __init__() constructor:
+
+{{{
+    self.youtube_scope = 'http://gdata.youtube.com'
+    self.my_app_domain = None # This will be set to the current app domain when a get() request
 }}}
 
 Print out the URL for the user to click on using the current domain and the YouTube scope.
 
 {{{
           self.my_app_domain = 'http://' + self.request._environ['HTTP_HOST']
-
+          
           self.response.out.write('<div id="sidebar"> '
               '<div id="scopes"><h4>Request a token</h4><ul>')
           self.response.out.write('<li><a href="%s">YouTube API</a></li>' % (
@@ -201,46 +233,20 @@ Print out the URL for the user to click on using the current domain and the YouT
 
 === Retrieving and Updating a Token ===
 
-Imports you'll need:
-
-{{{
-import wsgiref.handlers
-import urllib
-from google.appengine.ext import webapp
-from google.appengine.api import users
-import gdata.youtube.service
-import gdata.youtube
-import gdata.urlfetch
-}}}
-
 {{{
   def __init__(self):
     self.current_user = None
     self.token_scope = None
-    self.client = None
+    self.client = gdata.youtube.service.YouTubeService()
     self.token = None
     self.feed_url = 'http://gdata.youtube.com/feeds/api/users/default/uploads'
     self.youtube_scope = 'http://gdata.youtube.com'
-    self.developer_key = None
 
-  def get(self):
-    self.client = gdata.youtube.service.YouTubeService()
-    self.my_app_domain = 'http://' + self.request._environ['HTTP_HOST']
+}}}
 
-    self.response.out.write("""<html><head><title>
-        hello_authsub: AuthSub demo</title>
-        <link type="text/css" rel="stylesheet" href="/stylesheets/main.css" />
-        """)
+Parsing the one-time use token out of the return URL.
 
-    self.current_user = users.GetCurrentUser()
-
-    self.response.out.write('<body>')
-    if self.current_user:
-      self.response.out.write('<a href="%s">Sign Out</a><br>' % (
-          users.CreateLogoutURL(self.request.uri)))
-    else:
-      self.response.out.write('<a href="%s">Sign In</a><br>' % (
-          users.CreateLoginURL(self.request.uri)))
+{{{
 
     for param in self.request.query.split('&'):
       if param.startswith('token_scope'):
@@ -248,33 +254,16 @@ import gdata.urlfetch
       elif param.startswith('token'):
         self.token = param.split('=')[1]
 
-    # Manage our Authentication for the user
-    self.ManageAuth()
-
-    self.response.out.write('<div id="main">')
-
-    self.response.out.write(
-        '<div id="sidebar"><div id="scopes"><h4>Request a token</h4><ul>')
-    self.response.out.write('<li><a href="%s">YouTube</a></li>' % (
-        self.client.GenerateAuthSubURL(
-            'http://localhost:8080' +
-                '?token_scope=http://gdata.youtube.com',
-            'http://gdata.youtube.com', secure=False, session=True)))
-    self.response.out.write('</ul></div><br/><div id="tokens">')
-
-  def ManageAuth(self):
-    self.client = gdata.youtube.service.YouTubeService()
     if self.token and self.current_user:
-      self.UpgradeToken()
+      self.client.auth_token = self.token
+      self.client.UpgradeToSessionToken()
 
-  def UpgradeToken(self):
-    self.client.auth_token = self.token
-    self.client.UpgradeToSessionToken()
+    
 }}}
 
 === Storing a Session Token ===
 
-Additional imports:
+Now we're going to use the App Engine [http://code.google.com/appengine/docs/datastore/ Datastore] to store the token and the user's email. 
 
 {{{
 from google.appengine.ext import db
@@ -286,11 +275,9 @@ Creating the data structure to store the token:
 class StoredToken(db.Model):
   user_email = db.StringProperty(required=True)
   session_token = db.StringProperty(required=True)
-  target_url = db.StringProperty(required=True)
-  developer_key = db.StringProperty()
 }}}
 
-Modify the previous function to upgrade and now store the token:
+Write a helper function to upgrade the one-time use token and store the session token. 
 
 {{{
   def UpgradeAndStoreToken(self):
@@ -298,24 +285,39 @@ Modify the previous function to upgrade and now store the token:
     self.client.UpgradeToSessionToken()
     if self.current_user:
       new_token = StoredToken(user_email=self.current_user.email(), 
-          session_token=self.client.GetAuthSubToken(), 
-          target_url=self.token_scope)
+          session_token=self.client.GetAuthSubToken())
       new_token.put()
 }}}
 
 === Using a Stored Token ===
 
+
+{{{
+      if self.LookupToken():
+        self.response.out.write('<div id="video_listing">')
+        self.FetchFeed()
+        self.response.out.write('</div>')
+}}}
+
 {{{
   def LookupToken(self):
-    if self.feed_url and self.current_user:
+    if self.current_user:
       stored_tokens = StoredToken.gql('WHERE user_email = :1',
           self.current_user.email())
       for token in stored_tokens:
-        if self.feed_url.startswith(token.target_url):
-          self.client.auth_token = token.session_token
-          return True
+        self.client.auth_token = token.session_token
+        return True
 }}}
 
+Client is already authenticated, so we can grab the authenticated user's upload feed. Remember to enclose the request in a `try` `except` block. 
+
+{{{
+  def FetchFeed(self):
+    try:
+      feed = self.client.GetYouTubeVideoFeed(self.feed_url)
+    # ... iterate through feed, etc. 
+
+}}}
 
 = Browser-Based Upload =
 
@@ -323,7 +325,7 @@ We'll now make a small app that uploads a video to YouTube using the browser-bas
 
 Working source can be browsed [http://code.google.com/p/hello-youtube/source/browse/trunk/06_hello_browser_based_upload/ here]. Or downloaded [http://hello-youtube.googlecode.com/files/06_hello_browser_based_upload.zip here].
 
-Storing developer key in __init__()
+Create a new variable to store the developer key. 
 
 {{{
     self.developer_key = None
@@ -415,4 +417,5 @@ Create the form for the users to include the video file:
           <input name="file" type="file" size="50"/>
           <input name="token" type="hidden" value="%s"/>
           <br /><input value="Go" type="submit" />
-          </form></div>""" % (post_url, self.my_app_domain, youtube_token))}}}
+          </form></div>""" % (post_url, self.my_app_domain, youtube_token))
+}}}
