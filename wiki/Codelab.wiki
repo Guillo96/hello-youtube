@@ -320,6 +320,10 @@ Modify the previous function to upgrade and now store the token:
 
 = Browser-Based Upload =
 
+We'll now make a small app that uploads a video to YouTube using the browser-based upload method.
+
+Working source can be browsed [http://code.google.com/p/hello-youtube/source/browse/trunk/06_hello_browser_based_upload/ here]. Or downloaded [http://hello-youtube.googlecode.com/files/06_hello_browser_based_upload.zip here].
+
 Storing developer key in __init__()
 
 {{{
