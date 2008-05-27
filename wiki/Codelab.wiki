@@ -1,4 +1,5 @@
 #summary YouTube + App Engine Codelab
+#labels Featured
 
 = Introduction =
 
@@ -170,7 +171,245 @@ Solution can be found [http://code.google.com/p/hello-youtube/source/browse/trun
 
 = AuthSub =
 
-Now we'll walk through an example implementation using [http://code.google.com/apis/accounts/docs/AuthForWebApps.html AuthSub] authentication.
+Now we'll walk through an example implementation using [http://code.google.com/apis/accounts/docs/AuthForWebApps.html AuthSub] authentication. The application will authenticate the user and then print out the user's uploaded videos, including private videos. 
 
 Working source can be browsed [http://code.google.com/p/hello-youtube/source/browse/trunk/05_hello_authsub/ here]. Or downloaded [http://hello-youtube.googlecode.com/files/05_hello_authsub.zip here].
 
+=== Generating the AuthSub Link ==
+
+To generate the link, let's create some variables and add an __init__() file:
+
+{{{
+  def __init__(self):
+    self.youtube_scope = 'http://gdata.youtube.com'
+    self.my_app_domain = None
+
+}}}
+
+Print out the URL for the user to click on using the current domain and the YouTube scope.
+
+{{{
+          self.my_app_domain = 'http://' + self.request._environ['HTTP_HOST']
+
+          self.response.out.write('<div id="sidebar"> '
+              '<div id="scopes"><h4>Request a token</h4><ul>')
+          self.response.out.write('<li><a href="%s">YouTube API</a></li>' % (
+              self.client.GenerateAuthSubURL(
+              self.my_app_domain + '/' + '?token_scope=' + self.youtube_scope, 
+              self.youtube_scope, secure=False, session=True))
+              )
+}}}
+
+=== Retrieving and Updating a Token ===
+
+Imports you'll need:
+
+{{{
+import wsgiref.handlers
+import urllib
+from google.appengine.ext import webapp
+from google.appengine.api import users
+import gdata.youtube.service
+import gdata.youtube
+import gdata.urlfetch
+}}}
+
+{{{
+  def __init__(self):
+    self.current_user = None
+    self.token_scope = None
+    self.client = None
+    self.token = None
+    self.feed_url = 'http://gdata.youtube.com/feeds/api/users/default/uploads'
+    self.youtube_scope = 'http://gdata.youtube.com'
+    self.developer_key = None
+
+  def get(self):
+    self.client = gdata.youtube.service.YouTubeService()
+    self.my_app_domain = 'http://' + self.request._environ['HTTP_HOST']
+
+    self.response.out.write("""<html><head><title>
+        hello_authsub: AuthSub demo</title>
+        <link type="text/css" rel="stylesheet" href="/stylesheets/main.css" />
+        """)
+
+    self.current_user = users.GetCurrentUser()
+
+    self.response.out.write('<body>')
+    if self.current_user:
+      self.response.out.write('<a href="%s">Sign Out</a><br>' % (
+          users.CreateLogoutURL(self.request.uri)))
+    else:
+      self.response.out.write('<a href="%s">Sign In</a><br>' % (
+          users.CreateLoginURL(self.request.uri)))
+
+    for param in self.request.query.split('&'):
+      if param.startswith('token_scope'):
+        self.token_scope = urllib.unquote_plus(param.split('=')[1])
+      elif param.startswith('token'):
+        self.token = param.split('=')[1]
+
+    # Manage our Authentication for the user
+    self.ManageAuth()
+
+    self.response.out.write('<div id="main">')
+
+    self.response.out.write(
+        '<div id="sidebar"><div id="scopes"><h4>Request a token</h4><ul>')
+    self.response.out.write('<li><a href="%s">YouTube</a></li>' % (
+        self.client.GenerateAuthSubURL(
+            'http://localhost:8080' +
+                '?token_scope=http://gdata.youtube.com',
+            'http://gdata.youtube.com', secure=False, session=True)))
+    self.response.out.write('</ul></div><br/><div id="tokens">')
+
+  def ManageAuth(self):
+    self.client = gdata.youtube.service.YouTubeService()
+    if self.token and self.current_user:
+      self.UpgradeToken()
+
+  def UpgradeToken(self):
+    self.client.auth_token = self.token
+    self.client.UpgradeToSessionToken()
+}}}
+
+=== Storing a Session Token ===
+
+Additional imports:
+
+{{{
+from google.appengine.ext import db
+}}}
+
+Creating the data structure to store the token:
+
+{{{
+class StoredToken(db.Model):
+  user_email = db.StringProperty(required=True)
+  session_token = db.StringProperty(required=True)
+  target_url = db.StringProperty(required=True)
+  developer_key = db.StringProperty()
+}}}
+
+Modify the previous function to upgrade and now store the token:
+
+{{{
+  def UpgradeAndStoreToken(self):
+    self.client.auth_token = self.token
+    self.client.UpgradeToSessionToken()
+    if self.current_user:
+      new_token = StoredToken(user_email=self.current_user.email(), 
+          session_token=self.client.GetAuthSubToken(), 
+          target_url=self.token_scope)
+      new_token.put()
+}}}
+
+=== Using a Stored Token ===
+
+{{{
+  def LookupToken(self):
+    if self.feed_url and self.current_user:
+      stored_tokens = StoredToken.gql('WHERE user_email = :1',
+          self.current_user.email())
+      for token in stored_tokens:
+        if self.feed_url.startswith(token.target_url):
+          self.client.auth_token = token.session_token
+          return True
+}}}
+
+
+= Browser-Based Upload =
+
+Storing developer key in __init__()
+
+{{{
+    self.developer_key = None
+}}}
+
+In post
+
+{{{
+
+    developer_key = cgi.escape(self.request.get('developer_key'))
+}}}
+
+Displaying upload form - the form action will post to `/upload`. - TODO: categories.cat?
+
+{{{
+  def DisplayUploadForm(self):
+    self.response.out.write("""<br /><div id="upload_form">
+      <strong>Upload a new Video</strong><br /><br />
+      <form action="/upload" method="post" >
+      Video Title<br /><input type="text" name="video_title" /><br /><br />
+      Video Description<br /><textarea cols="50" name="video_description">
+      </textarea><br /><br />
+      Select a Category <select name="video_category">
+        <option value="Autos">Autos &amp; Vehicles</option>
+        <option value="Music">Music</option>
+        <option value="Animals">Pets &amp; Animals</option>
+        <option value="Sports">Sports</option>
+        <option value="Travel">Travel &amp; Events</option>
+        <option value="Games">Gadgets &amp; Games</option>
+        <option value="Comedy">Comedy</option>
+        <option value="People">People &amp; Blogs</option>
+        <option value="News">News &amp; Politics</option>
+        <option value="Entertainment">Entertainment</option>
+        <option value="Education">Education</option>
+        <option value="Howto">Howto &amp; Style</option>
+        <option value="Nonprofit">Nonprofit &amp; Activism</option>
+        <option value="Tech">Science &amp; Technology</option>',
+      </select><br /><br />
+      Enter some tags to describe your video <em>(separated by spaces)</em>
+      <br /><br />
+      <input type="text" name="video_tags" />
+      <input type="submit" value="Go"/>
+    </form></div>
+    """)
+}}}
+
+== Upload.py ==
+
+In the `post()` method, we construct the `YouTubeVideoEntry`:
+
+{{{
+    if self.LookupToken() and self.LookupDevKey():
+      video_title = cgi.escape(self.request.get('video_title'))
+      video_description = cgi.escape(self.request.get('video_description'))
+      video_category = cgi.escape(self.request.get('video_category'))
+      video_tags = cgi.escape(self.request.get('video_tags'))
+      
+      my_media_group = gdata.media.Group(
+        title = gdata.media.Title(text=video_title),
+        description = gdata.media.Description(description_type='plain',
+                                            text=video_description),
+        keywords = gdata.media.Keywords(text=video_tags),
+        category = gdata.media.Category(
+          text=video_category,
+          scheme='http://gdata.youtube.com/schemas/2007/categories.cat',
+          label=video_category),
+      player=None
+      )
+      
+      video_entry = gdata.youtube.YouTubeVideoEntry(media=my_media_group)
+}}}
+
+Post the metadata and get the token back:
+
+{{{
+      self.server_response = self.client.GetFormUploadToken(video_entry)
+
+      post_url = self.server_response[0]
+      youtube_token = self.server_response[1]
+}}}
+
+Create the form for the users to include the video file:
+
+{{{
+      self.response.out.write("""<div id="file_upload">Upload your video file
+          <br /><br />
+          <form action="%s?nexturl=%s" method="post" 
+          enctype="multipart/form-data">
+          <input name="file" type="file" size="50"/>
+          <input name="token" type="hidden" value="%s"/>
+          <br /><input value="Go" type="submit" />
+          </form></div>""" % (post_url, self.my_app_domain, youtube_token))}}}
