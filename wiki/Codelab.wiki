@@ -17,6 +17,7 @@ Here are the things you'll need:
 
 Please also hop into our IRC channel if you feel so inclined:
 
+  * irc.freenode.net
   * #youtubecodelab
 
 = Hello App Engine =
