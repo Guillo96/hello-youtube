@@ -1,19 +1,11 @@
-#!/usr/bin/env python
-
-import cgi
 import wsgiref.handlers
-import os
-import urllib
 
 import gdata.urlfetch
 import gdata.service
 import gdata.youtube
 import gdata.youtube.service
 
-from google.appengine.api import users
 from google.appengine.ext import webapp
-from google.appengine.ext import db
-from google.appengine.ext.webapp import template
 
 gdata.service.http_request_handler = gdata.urlfetch
 
