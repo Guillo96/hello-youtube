@@ -16,7 +16,6 @@
 __author__ = ('api.jscudder (Jeffrey Scudder), '
               'api.jhartmann@gmail.com (Jochen Hartmann)')
 
-
 import wsgiref.handlers
 import urllib
 import cgi
@@ -50,21 +49,20 @@ class AuthSub(webapp.RequestHandler):
     self.feed_url = 'http://gdata.youtube.com/feeds/api/users/default/uploads'
     self.youtube_scope = 'http://gdata.youtube.com'
     self.developer_key = None
+    self.client = gdata.youtube.service.YouTubeService()
 
   def get(self):
-    self.client = gdata.youtube.service.YouTubeService()
     self.my_app_domain = 'http://' + self.request._environ['HTTP_HOST']
     self.response.out.write("""<html><head><title>
         hello_authsub: AuthSub demo</title>
         <link type="text/css" rel="stylesheet" href="/stylesheets/main.css" />
         """)
+
     # Get the current user
     self.current_user = users.GetCurrentUser()
     self.response.out.write('</head><body>')
-    # Allow the user to sign in or sign out
 
-    
-
+    # Split URL parameters if found
     for param in self.request.query.split('&'):
       if param.startswith('token_scope'):
         self.token_scope = urllib.unquote_plus(param.split('=')[1])
@@ -73,25 +71,25 @@ class AuthSub(webapp.RequestHandler):
       elif param.startswith('feed_url'):
         self.feed_url = urllib.unquote_plus(param.split('=')[1])
 
-    if self.token and self.feed_url and not self.token_scope:
-      self.token_scope = self.feed_url
-
-
     if self.current_user:
       self.response.out.write('<a href="%s">Sign Out</a><br /><br />' % (
           users.CreateLogoutURL(self.request.uri)))
+
+      # See if we have a stored session token in the database
       if self.LookupToken():
         self.response.out.write('<div id="video_listing">')
         self.FetchFeed()
         self.response.out.write('</div>')
 
-      # not authenticated...
+      # No saved token found
       else:
+        # Check if we have a one-time use token in the URL parameters
         if self.token:
           self.UpgradeAndStoreToken()
           self.redirect('/')
         else:
-          # request a one-time token
+          # No stored token found, no one-time use token set, but we have
+          # a self.current_user, so present the option to get a token
           self.response.out.write('<div id="sidebar"> '
               '<div id="scopes"><h4>Request a token</h4><ul>')
           self.response.out.write('<li><a href="%s">YouTube API</a></li>' % (
@@ -100,13 +98,14 @@ class AuthSub(webapp.RequestHandler):
               self.youtube_scope, secure=False, session=True))
               )
     else:
+      # No self.current_user so build sign-in box
       self.response.out.write('<a href="%s">Sign In</a><br />' % (
           users.CreateLoginURL(self.request.uri)))
 
     
 
   def FetchFeed(self):
-    # Attempt to fetch the feed.
+    # Get users video feed
     if not self.client:
       self.client = gdata.youtube.service.YouTubeService()
 
@@ -142,7 +141,6 @@ class AuthSub(webapp.RequestHandler):
         self.response.out.write('<span class="video_keywords"><strong>Keywords:'
             '</strong> %s </span><br />' % entry.media.keywords)
 
-
         self.response.out.write('</td></tr>')
         self.response.out.write(
           '<tr><td height="20" colspan="2"><hr class="slight"/></tr>')
@@ -166,7 +164,6 @@ class AuthSub(webapp.RequestHandler):
             'Something else went wrong, here is the error object: %s ' % (
                 str(request_error[0])))
 
-
   def UpgradeAndStoreToken(self):
     self.client.auth_token = self.token
     self.client.UpgradeToSessionToken()
@@ -177,7 +174,7 @@ class AuthSub(webapp.RequestHandler):
       new_token.put()
 
   def LookupToken(self):
-    if self.feed_url and self.current_user:
+    if self.current_user:
       stored_tokens = StoredToken.gql('WHERE user_email = :1',
           self.current_user.email())
       for token in stored_tokens:
