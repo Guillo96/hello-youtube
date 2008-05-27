@@ -62,6 +62,12 @@ if __name__ == "__main__":
 
 All the source files can be browsed [http://code.google.com/p/hello-youtube/source/browse here] under [http://code.google.com/p/hello-youtube/source/browse/trunk/01_hello_app_engine/ 01_hello_app_engine]. Or, download the zip files [http://hello-youtube.googlecode.com/files/01_hello_app_engine.zip here]. 
 
+== Note about deploying on a Mac ==
+You can use the App Engine Launcher instead of the command line
+    
+  # Drag your project folder into the Launcher to add it
+  # Click "Run"
+
 = Hello YouTube =
 
 Let's fiddle around with fetching feeds on the command line. Download the client library modules [TODO here].
@@ -103,6 +109,8 @@ Accessing metadata
 
 To use the Google Data Python Client Library with your Google App Engine application, simply place the library source files in your application's directory. The `atom/` and `gdata/` source files are available [TODO here]. The only other step is to set the `gdata.service.http_request_handler` to use `gdata.urlfetch`. 
 
+Let's take what we just learned about using the client library with the API, and put it into a running App Engine app. Add these calls into the `get` method. 
+
 {{{
 #!/usr/bin/env python
 
@@ -142,3 +150,20 @@ if __name__ == "__main__":
   main()
 }}}
 
+== Assignment #1 (5 min) ==
+
+Make a page that retrieves and prints out the title, description, and first thumbnail from the [http://code.google.com/apis/youtube/reference.html#Standard_feeds Recently Featured] standard feed.
+
+Solution can be found [http://code.google.com/p/hello-youtube/source/browse/trunk/02_hello_python_client_library/main.py here]
+
+== Assignment #2 ==
+
+Do a parameterized query to the search feed. Restrict the results to 5 videos with the term 'bicycle' in the metadata. Order the results by view count.
+
+Solution can be found [http://code.google.com/p/hello-youtube/source/browse/trunk/03_hello_youtube_search_query/main.py here].
+
+== Assignment #3 ==
+
+Take text input from the user and do a search query. Print out the results and embed the video.
+
+Solution can be found [http://code.google.com/p/hello-youtube/source/browse/trunk/04_hello_user_input/main.py here].
