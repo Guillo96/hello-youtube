@@ -35,8 +35,6 @@ gdata.service.http_request_handler = gdata.urlfetch
 class StoredToken(db.Model):
   user_email = db.StringProperty(required=True)
   session_token = db.StringProperty(required=True)
-  target_url = db.StringProperty(required=True)
-  developer_key = db.StringProperty()
 
 
 class AuthSub(webapp.RequestHandler):
@@ -169,8 +167,7 @@ class AuthSub(webapp.RequestHandler):
     self.client.UpgradeToSessionToken()
     if self.current_user:
       new_token = StoredToken(user_email=self.current_user.email(), 
-          session_token=self.client.GetAuthSubToken(), 
-          target_url=self.token_scope)
+          session_token=self.client.GetAuthSubToken())
       new_token.put()
 
   def LookupToken(self):
@@ -178,9 +175,8 @@ class AuthSub(webapp.RequestHandler):
       stored_tokens = StoredToken.gql('WHERE user_email = :1',
           self.current_user.email())
       for token in stored_tokens:
-        if self.feed_url.startswith(token.target_url):
-          self.client.auth_token = token.session_token
-          return True
+        self.client.auth_token = token.session_token
+        return True
 
     
 def main():
