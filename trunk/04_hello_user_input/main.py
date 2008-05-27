@@ -14,7 +14,7 @@ class SearchPage(webapp.RequestHandler):
   def get(self):
     self.response.out.write("""
       <html>
-        <body>
+        <body><br/>Please enter a search term:<br/>
           <form action="/" method="post">
             <div><input type="text" name="content" /></div>
             <div><input type="submit" value="Search YouTube"></div>
@@ -24,6 +24,10 @@ class SearchPage(webapp.RequestHandler):
       
   def post(self):
     search_term = cgi.escape(self.request.get('content')).encode('UTF-8')
+    if not search_term:
+        self.redirect('/')
+        return
+      
     self.response.out.write("""<html><head><title>
         hello_youtube_search_query: Searching YouTube</title>
         <link type="text/css" rel="stylesheet" href="/stylesheets/main.css" />
