@@ -37,7 +37,6 @@ gdata.service.http_request_handler = gdata.urlfetch
 class StoredToken(db.Model):
   user_email = db.StringProperty(required=True)
   session_token = db.StringProperty(required=True)
-  target_url = db.StringProperty(required=True)
   developer_key = db.StringProperty()
 
 
@@ -83,6 +82,7 @@ class Upload(webapp.RequestHandler):
           label=video_category),
       player=None
       )
+      
       video_entry = gdata.youtube.YouTubeVideoEntry(media=my_media_group)
       
       try:
@@ -126,9 +126,8 @@ class Upload(webapp.RequestHandler):
       stored_tokens = StoredToken.gql('WHERE user_email = :1',
           self.current_user.email())
       for token in stored_tokens:
-        if self.feed_url.startswith(token.target_url):
-          self.client.auth_token = token.session_token
-          return True
+        self.client.auth_token = token.session_token
+        return True
 
 
 def main():
