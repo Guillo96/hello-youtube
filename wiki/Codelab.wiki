@@ -30,6 +30,12 @@ Please also hop into our IRC channel if you feel so inclined:
 If you don't have a IRC client installed, there are web-based clients:
   * http://www.mibbit.com
 
+Finally, documentation. We're not going over everything, so go through the docs when you get a chance.
+
+  * [http://code.google.com/apis/youtube/reference.html YouTube API Reference Guide]
+  * [http://code.google.com/apis/youtube/developers_guide_protocol YouTube API Protocol Guide]
+  * [http://code.google.com/appengine/docs/ App Engine docs]
+
 = Hello App Engine =
 
 Here's a crash course in App Engine. For more detailed documentation, refer to the [http://code.google.com/appengine App Engine docs]. We're assuming all of your project files are in a folder named `Codelab`.
@@ -165,6 +171,7 @@ Make a page that retrieves and prints out the title, description, and first thum
 HINTS:
   * 
 
+
 Solution can be found [http://code.google.com/p/hello-youtube/source/browse/trunk/02_hello_python_client_library/main.py here]
 
 == Assignment #2 ==
@@ -174,6 +181,7 @@ Do a parameterized query to the search feed. Restrict the results to 5 videos wi
 HINTS:
   * 
 
+
 Solution can be found [http://code.google.com/p/hello-youtube/source/browse/trunk/03_hello_youtube_search_query/main.py here].
 
 == Assignment #3 ==
@@ -182,6 +190,7 @@ Take text input from the user and do a search query. Print out the results and e
 
 HINTS:
   * 
+
 
 Solution can be found [http://code.google.com/p/hello-youtube/source/browse/trunk/04_hello_user_input/main.py here].
 
