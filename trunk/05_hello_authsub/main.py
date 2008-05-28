@@ -41,7 +41,6 @@ class AuthSub(webapp.RequestHandler):
 
   def __init__(self):
     self.current_user = None
-    self.token_scope = None
     self.client = None
     self.token = None
     self.feed_url = 'http://gdata.youtube.com/feeds/api/users/default/uploads'
@@ -62,9 +61,7 @@ class AuthSub(webapp.RequestHandler):
 
     # Split URL parameters if found
     for param in self.request.query.split('&'):
-      if param.startswith('token_scope'):
-        self.token_scope = urllib.unquote_plus(param.split('=')[1])
-      elif param.startswith('token'):
+      if param.startswith('token'):
         self.token = param.split('=')[1]
       elif param.startswith('feed_url'):
         self.feed_url = urllib.unquote_plus(param.split('=')[1])
@@ -92,8 +89,7 @@ class AuthSub(webapp.RequestHandler):
               '<div id="scopes"><h4>Request a token</h4><ul>')
           self.response.out.write('<li><a href="%s">YouTube API</a></li>' % (
               self.client.GenerateAuthSubURL(
-              self.my_app_domain + '/' + '?token_scope=' + self.youtube_scope, 
-              self.youtube_scope, secure=False, session=True))
+              self.my_app_domain, self.youtube_scope, secure=False, session=True))
               )
     else:
       # No self.current_user so build sign-in box
@@ -154,8 +150,7 @@ class AuthSub(webapp.RequestHandler):
         self.response.out.write(
             '<li><a href="%s">YouTube API</a></li>' % (
             self.client.GenerateAuthSubURL(
-            self.my_app_domain + '/' + '?token_scope=' + self.youtube_scope, 
-            self.youtube_scope, secure=False, session=True))
+            self.my_app_domain, self.youtube_scope, secure=False, session=True))
         )
       else:
         self.response.out.write(
