@@ -179,9 +179,9 @@ Solution can be found [http://code.google.com/p/hello-youtube/source/browse/trun
 Do a parameterized query to the search feed. Restrict the results to 5 videos with the term 'bicycle dalmation' in the metadata. Order the results by view count.
 
 HINTS:
-  * Create a new YouTubeVideoQuery() object
+  * Create a new `YouTubeVideoQuery()` object
   * All the [http://code.google.com/apis/youtube/reference.html#Query_parameter_definitions parameters] can be set as attributes on this object -- a max_result, a vq (a video query/search term), an orderby. 
-  * Once you have the query object built, run YouTubeQuery(query) on the service object to send the request
+  * Once you have the query object built, run `YouTubeQuery(query)` on the service object to send the request
 
 
 Solution can be found [http://code.google.com/p/hello-youtube/source/browse/trunk/03_hello_youtube_search_query/main.py here].
