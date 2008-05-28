@@ -166,10 +166,10 @@ if __name__ == "__main__":
 
 == Assignment #1 ==
 
-Make a page that retrieves and prints out the title, description, and first thumbnail from the [http://code.google.com/apis/youtube/reference.html#Standard_feeds Recently Featured] standard feed.
+Make a page that retrieves and prints out the title, description, and first thumbnail from the [http://code.google.com/apis/youtube/reference.html#Standard_feeds Most Viewed] standard feed.
 
-HINTS:
-  * 
+HINT:
+  * Check out the YouTube [http://code.google.com/p/hello-youtube/source/browse/trunk/02_hello_python_client_library/gdata/youtube/service.py#245 service class]
 
 
 Solution can be found [http://code.google.com/p/hello-youtube/source/browse/trunk/02_hello_python_client_library/main.py here]
@@ -179,7 +179,9 @@ Solution can be found [http://code.google.com/p/hello-youtube/source/browse/trun
 Do a parameterized query to the search feed. Restrict the results to 5 videos with the term 'bicycle dalmation' in the metadata. Order the results by view count.
 
 HINTS:
-  * 
+  * Create a new YouTubeVideoQuery() object
+  * All the [http://code.google.com/apis/youtube/reference.html#Query_parameter_definitions parameters] can be set as attributes on this object -- a max_result, a vq (a video query/search term), an orderby. 
+  * Once you have the query object built, run YouTubeQuery(query) on the service object to send the request
 
 
 Solution can be found [http://code.google.com/p/hello-youtube/source/browse/trunk/03_hello_youtube_search_query/main.py here].
@@ -189,7 +191,8 @@ Solution can be found [http://code.google.com/p/hello-youtube/source/browse/trun
 Take text input from the user and do a search query. Print out the results and embed the video.
 
 HINTS:
-  * 
+  * [http://code.google.com/appengine/docs/gettingstarted/handlingforms.html Form handling] in App Engine
+  * To can use the standard embed code found on every YouTube watch page. All you need to replace is the SWF URL for the video. This can be accessed with a helper function in the [http://code.google.com/p/hello-youtube/source/browse/trunk/02_hello_python_client_library/gdata/youtube/__init__.py#339  YouTubeVideoEntry] data class.
 
 
 Solution can be found [http://code.google.com/p/hello-youtube/source/browse/trunk/04_hello_user_input/main.py here].
