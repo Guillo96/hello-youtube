@@ -7,13 +7,20 @@ This codelab will take you through the basics of using the Google Data Python Cl
 
 = Before We Start =
 
-Here are the things you'll need:
+Here are the things you'll need starting the first hour:
+
   * Knowledge of [http://python.org Python]
   * [http://python.org/download/ Python 2.5] on your local machine
   * [http://code.google.com/appengine/downloads.html App Engine SDK]
-  * App Engine Account - TODO: Add live link once it's open
+
+Things you'll need starting the second hour:
+
   * YouTube [http://code.google.com/apis/youtube/dashboard/ Developer Key]
   * YouTube [http://youtube.com/signup Account] (preferably a test account with a private video uploaded to test authenticated feeds)
+
+After the session:
+  
+  * Sign up for an [http://appengine.google.com App Engine Account] if you haven't already to deploy your awesome app to production!
 
 Please also hop into our IRC channel if you feel so inclined:
 
@@ -21,7 +28,7 @@ Please also hop into our IRC channel if you feel so inclined:
   * #youtubecodelab
 
 If you don't have a IRC client installed, there are web-based clients:
-  * www.mibbit.com
+  * http://www.mibbit.com
 
 = Hello App Engine =
 
@@ -96,7 +103,7 @@ Getting a video feed with that service object
 >>> feed = client.GetMostViewedVideoFeed()
 }}}
 
-Feed now contains a list of video entries. Let's look at the structure.
+Feed now contains a list of video entries. Let's look at the structure. We'll import pretty print so we can see the structure more clearly. 
 
 {{{
 >>> from pprint import pprint as px
@@ -155,17 +162,26 @@ if __name__ == "__main__":
 
 Make a page that retrieves and prints out the title, description, and first thumbnail from the [http://code.google.com/apis/youtube/reference.html#Standard_feeds Recently Featured] standard feed.
 
+HINTS:
+  * 
+
 Solution can be found [http://code.google.com/p/hello-youtube/source/browse/trunk/02_hello_python_client_library/main.py here]
 
 == Assignment #2 ==
 
 Do a parameterized query to the search feed. Restrict the results to 5 videos with the term 'bicycle dalmation' in the metadata. Order the results by view count.
 
+HINTS:
+  * 
+
 Solution can be found [http://code.google.com/p/hello-youtube/source/browse/trunk/03_hello_youtube_search_query/main.py here].
 
 == Assignment #3 ==
 
 Take text input from the user and do a search query. Print out the results and embed the video.
+
+HINTS:
+  * 
 
 Solution can be found [http://code.google.com/p/hello-youtube/source/browse/trunk/04_hello_user_input/main.py here].
 
@@ -174,17 +190,6 @@ Solution can be found [http://code.google.com/p/hello-youtube/source/browse/trun
 Now we'll walk through an example implementation using [http://code.google.com/apis/accounts/docs/AuthForWebApps.html AuthSub] authentication. The application will authenticate the user and then print out the user's uploaded videos, including private videos. 
 
 Working source can be browsed [http://code.google.com/p/hello-youtube/source/browse/trunk/05_hello_authsub/ here]. Or downloaded [http://hello-youtube.googlecode.com/files/05_hello_authsub.zip here].
-
-=== Note about App Engine Admin Console ===
-
-We'll be storing the session token using the App Engine Datastore, so now's a good time to bring up the admin console.
-  * http://localhost:8080/_ah/admin/
-
-Here you can view the content of the Datastore. 
-  * http://localhost:8080/_ah/admin/datastore
-  * Enter the name of the data structure that you created in the app to view contents
-    * In the case of our example, "StoredToken"
-
 
 === Using the App Engine Users API ===
 
@@ -291,6 +296,17 @@ Write a helper function to upgrade the one-time use token and store the session 
           session_token=self.client.GetAuthSubToken())
       new_token.put()
 }}}
+
+=== Note about App Engine Admin Console ===
+
+We'll be storing the session token using the App Engine Datastore, so now's a good time to bring up the admin console.
+  * http://localhost:8080/_ah/admin/
+
+Here you can view the content of the Datastore. 
+  * http://localhost:8080/_ah/admin/datastore
+  * Enter the name of the data structure that you created in the app to view contents
+    * In the case of our example, "StoredToken"
+
 
 === Using a Stored Token ===
 
