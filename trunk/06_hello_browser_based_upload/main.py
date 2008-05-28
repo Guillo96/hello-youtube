@@ -36,7 +36,6 @@ gdata.service.http_request_handler = gdata.urlfetch
 class StoredToken(db.Model):
   user_email = db.StringProperty(required=True)
   session_token = db.StringProperty(required=True)
-  target_url = db.StringProperty(required=True)
   developer_key = db.StringProperty()
 
 
@@ -50,6 +49,8 @@ class AuthSub(webapp.RequestHandler):
     self.feed_url = 'http://gdata.youtube.com/feeds/api/users/default/uploads'
     self.youtube_scope = 'http://gdata.youtube.com'
     self.developer_key = None
+    self.upload_status = None
+    self.new_video_id = None
 
   def get(self):
     self.client = gdata.youtube.service.YouTubeService()
@@ -72,6 +73,10 @@ class AuthSub(webapp.RequestHandler):
         self.token = param.split('=')[1]
       elif param.startswith('feed_url'):
         self.feed_url = urllib.unquote_plus(param.split('=')[1])
+      elif param.startswith('status'):
+        self.upload_status = urllib.unquote_plus(param.split('=')[1])
+      elif param.startswith('id'):
+        self.new_video_id = urllib.unquote_plus(param.split('=')[1])
 
     if self.token and self.feed_url and not self.token_scope:
       self.token_scope = self.feed_url
@@ -82,6 +87,13 @@ class AuthSub(webapp.RequestHandler):
           users.CreateLogoutURL(self.request.uri)))
       if self.LookupToken():
         self.response.out.write('<div id="video_listing">')
+        
+        if self.upload_status:
+          self.response.out.write('<span class="video_keywords">Video upload'
+              ' status: %s<br />' % self.upload_status)  
+          self.response.out.write('New video Id: %s</span><br /><br />' % 
+              self.new_video_id)
+        
         self.FetchFeed()
         if self.LookupDevKey():
           self.DisplayUploadForm()
@@ -95,6 +107,7 @@ class AuthSub(webapp.RequestHandler):
       else:  
         if self.token:
           self.UpgradeAndStoreToken()
+          self.redirect('/')
         else:
           # request a one-time token
           self.response.out.write('<div id="sidebar"> '
@@ -173,7 +186,7 @@ class AuthSub(webapp.RequestHandler):
 
   def post(self):
     self.response.out.write("""<html><head><title>
-        hello_authsub: Authenticate to the YouTube API</title>
+        hello_browser_based_upload: Storing developer key</title>
         <link type="text/css" rel="stylesheet" href="/stylesheets/main.css" />
         </head><body>""")
 
@@ -185,7 +198,7 @@ class AuthSub(webapp.RequestHandler):
         self.current_user.email())
     for token in stored_tokens:
         new_token = StoredToken(user_email=token.user_email, 
-            session_token=token.session_token, target_url=token.target_url, 
+            session_token=token.session_token, 
             developer_key=developer_key)
         token.delete()
     new_token.put()
@@ -196,8 +209,7 @@ class AuthSub(webapp.RequestHandler):
     self.client.UpgradeToSessionToken()
     if self.current_user:
       new_token = StoredToken(user_email=self.current_user.email(), 
-          session_token=self.client.GetAuthSubToken(), 
-          target_url=self.token_scope)
+          session_token=self.client.GetAuthSubToken())
       new_token.put()
 
   def LookupToken(self):
@@ -205,9 +217,8 @@ class AuthSub(webapp.RequestHandler):
       stored_tokens = StoredToken.gql('WHERE user_email = :1',
           self.current_user.email())
       for token in stored_tokens:
-        if self.feed_url.startswith(token.target_url):
-          self.client.auth_token = token.session_token
-          return True
+        self.client.auth_token = token.session_token
+        return True
 
   def LookupDevKey(self):
     if self.current_user:
@@ -262,7 +273,7 @@ class AuthSub(webapp.RequestHandler):
     Current Developer Key stored:<br />
     <form action="/" method="post" >
       <input type="text" name="developer_key" value="%s" size="90"/><br />
-      <input type="submit" value="Update"/>
+      <input type="submit" value="Store as New"/>
     </form></div>""" % 
     self.client.additional_headers['X-GData-Key'].split('=')[1])
     
