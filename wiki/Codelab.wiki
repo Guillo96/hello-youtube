@@ -246,8 +246,7 @@ Print out the URL for the user to click on using the current domain and the YouT
               '<div id="scopes"><h4>Request a token</h4><ul>')
           self.response.out.write('<li><a href="%s">YouTube API</a></li>' % (
               self.client.GenerateAuthSubURL(
-              self.my_app_domain + '/' + '?token_scope=' + self.youtube_scope, 
-              self.youtube_scope, secure=False, session=True))
+              self.my_app_domain, self.youtube_scope, secure=False, session=True))
               )
 }}}
 
