@@ -128,7 +128,7 @@ class AuthSub(webapp.RequestHandler):
             entry.media.description)
         self.response.out.write(
             '<span class="video_category"><strong>%s</strong></span>' % 
-            entry.media.category)
+            entry.media.category[0])
         self.response.out.write('<span class="video_published"> | published '
             'on %s</span><br />' % (entry.published.text.split('T')[0] + ' at ' +
             entry.published.text.split('T')[1][:5] + ' PST'))

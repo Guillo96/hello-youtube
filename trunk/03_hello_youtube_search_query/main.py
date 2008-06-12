@@ -13,10 +13,13 @@ class MainPage(webapp.RequestHandler):
   def get(self):
     client = gdata.youtube.service.YouTubeService()
     query = gdata.youtube.service.YouTubeVideoQuery()
-    
-    query.vq = 'bicycle dalmation'
+
+    query.vq = 'bicycle dalmatian'
     query.orderby = 'viewCount'
     query.max_results = '5'
+
+    self.response.out.write('<span class="listing_title">Searching for "' +
+        query.vq + '"</span><br /><br />')
 
     feed = client.YouTubeQuery(query)
 
@@ -24,14 +27,10 @@ class MainPage(webapp.RequestHandler):
         hello_youtube_search_query: Searching YouTube</title>
         <link type="text/css" rel="stylesheet" href="/stylesheets/main.css" />
         </head><body><div id="video_listing">""")
-    
-    self.response.out.write('<span class="listing_title">Searching for "' +
-        query.vq + 
-        '"</span><br /><br />')
 
     self.response.out.write('<table border="0" cellpadding="2" '
         'cellspacing="0">')
-    
+
     for entry in feed.entry:
       self.response.out.write('<tr><td class="thumbnail">')
       self.response.out.write(
@@ -48,17 +47,9 @@ class MainPage(webapp.RequestHandler):
           '<span class="video_description">%s</span>'
           '<br /><br />' % entry.media.description)
 
-    # uncomment this section to show the embeddable player
-    # if entry.GetSwfUrl():
-    #   self.response.out.write('<object width="425" height="350">'
-    #      '<param name="movie" value="' + entry.GetSwfUrl() + '"></param>'
-    #       '<embed src="' + entry.GetSwfUrl() + 
-    #       '" type="application/x-shockwave-flash" '
-    #       'width="425" height="350"></embed></object>')
-
       self.response.out.write(
           '<span class="video_category"><strong>%s</strong></span>' % 
-          entry.media.category)
+          entry.media.category[0])
       self.response.out.write('<span class="video_published"> | published '
           'on %s</span><br />' % (entry.published.text.split('T')[0] + ' at ' +
           entry.published.text.split('T')[1][:5] + ' PST'))
