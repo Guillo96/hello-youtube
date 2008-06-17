@@ -39,7 +39,7 @@ YOUTUBE_SERVICE = 'youtube'
 YOUTUBE_SUPPORTED_UPLOAD_TYPES = ('mov', 'avi', 'wmv', 'mpg', 'quicktime')
 YOUTUBE_QUERY_VALID_TIME_PARAMETERS = ('today', 'this_week', 'this_month',
                                        'all_time')
-YOUTUBE_QUERY_VALID_ORDERBY_PARAMETERS = ('updated', 'viewCount', 'rating',
+YOUTUBE_QUERY_VALID_ORDERBY_PARAMETERS = ('published', 'viewCount', 'rating',
                                           'relevance')
 YOUTUBE_QUERY_VALID_RACY_PARAMETERS = ('include', 'exclude')
 YOUTUBE_QUERY_VALID_FORMAT_PARAMETERS = ('1', '5', '6')
@@ -132,9 +132,10 @@ class YouTubeService(gdata.service.GDataService):
   def __init__(self, email=None, password=None, source=None,
                server=YOUTUBE_SERVER, additional_headers=None, client_id=None,
                developer_key=None):
+    self.additional_headers = {}
     if client_id is not None and developer_key is not None:
-      self.additional_headers = {'X-Gdata-Client': self.client_id,
-                                 'X-GData-Key': 'key=%s' % self.developer_key}
+      self.additional_headers = {'X-Gdata-Client': client_id,
+                                 'X-GData-Key': 'key=%s' % developer_key}
 
       gdata.service.GDataService.__init__(
           self, email=email, password=password, service=YOUTUBE_SERVICE, 
@@ -1390,8 +1391,9 @@ class YouTubeVideoQuery(gdata.service.Query):
 
   def _SetOrderBy(self, val):
     if val not in YOUTUBE_QUERY_VALID_ORDERBY_PARAMETERS:
-      raise YouTubeError('OrderBy must be one of: %s ' %
-                         ' '.join(YOUTUBE_QUERY_VALID_ORDERBY_PARAMETERS))
+      if val.startswith('relevance_lang_') is False:
+        raise YouTubeError('OrderBy must be one of: %s ' %
+                           ' '.join(YOUTUBE_QUERY_VALID_ORDERBY_PARAMETERS))
     self['orderby'] = val
 
   orderby = property(_GetOrderBy, _SetOrderBy,
