@@ -5,12 +5,30 @@ body {
 
 #video_listing {
   background-color: #fff;
-  width: 800px;
+  width: 700px;
   padding: 10px;
-  margin-left: 20px;
+  margin-left: auto;
+  margin-right: auto;
   margin-top: 10px;
   margin-bottom: 20px;
   border: 1px solid #ddd;
+}
+
+#errors {
+  background-color: #8F0000;
+  width: 700px;
+  padding: 10px;
+  margin-left: auto;
+  margin-right: auto;
+  margin-top: 10px;
+  margin-bottom: 20px;
+  border: 1px solid #ddd;
+  color: #fff;
+  
+}
+
+.error_heading {
+  font-size: 125%;
 }
 
 .listing_title {
@@ -19,6 +37,62 @@ body {
   color: #2FBFAF;
 }
 
+#search_input {
+  background-color: #fff;
+  width: 700px;
+  padding: 10px;
+  margin-left: auto;
+  margin-right: auto;
+  margin-top: 10px;
+  margin-bottom: 20px;
+  border: 1px solid #ddd;
+}
+
+input, select  {
+  background-color: #eee;
+  border: 1px solid #ddd;
+}
+
+input {
+    color: #555;
+
+}
+input:hover {
+  color: #000;
+  background-color: #fff;
+}
+
+.note {
+  font-size: 80%;
+  color: #666;
+}
+
+table.query_params {
+  font-size: 80%;
+  line-height: 120%;
+}
+
+td.search_param {
+  text-align: center;
+  width: 200px;
+  border-right: 1px solid #eee;
+}
+
+td.code {
+  /* td showing code and search again link */
+  vertical-align: top;
+  text-align: left;
+  font-size: 80%;
+  padding-left: 10px;
+  width: 400px;
+}
+
+td.code pre {
+  background-color: #eee;
+  padding: 10px;
+  color: #444;
+  border: 1px solid #aaa;
+}
 table.video_table {
   border: none;
 }
@@ -60,6 +134,11 @@ table.video_table {
   font-size: 70%;
 }
 
+.format_link {
+  font-size: 70%;
+  
+  
+}
 .slight {
   border: none;
   border-bottom: 1px solid #ddd;
