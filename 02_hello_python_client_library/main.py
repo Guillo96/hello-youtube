@@ -4,9 +4,7 @@ import gdata.service
 import gdata.youtube
 import gdata.youtube.service
 
-from google.appengine.api import users
 from google.appengine.ext import webapp
-from google.appengine.ext import db
 
 # set request handling to gdata.urlfetch
 gdata.service.http_request_handler = gdata.urlfetch
