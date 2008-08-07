@@ -1,6 +1,5 @@
 import wsgiref.handlers
 import gdata.urlfetch
-import gdata.service
 import gdata.youtube
 import gdata.youtube.service
 
