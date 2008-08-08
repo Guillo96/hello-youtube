@@ -1,4 +1,4 @@
-application: hello-authsub
+application: hello-upload
 version: 1
 api_version: 1
 runtime: python
@@ -9,9 +9,6 @@ handlers:
 
 - url: /upload
   script: upload.py
-
-- url: /set_key
-  script: set_key.py
 
 - url: /stylesheets
   static_dir: stylesheets
