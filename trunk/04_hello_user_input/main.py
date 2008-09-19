@@ -5,7 +5,6 @@ import gdata.urlfetch
 import gdata.service
 import gdata.youtube
 import gdata.youtube.service
-import pprint
 
 from google.appengine.ext import webapp
 from google.appengine.ext import db
